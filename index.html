@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Oma Heart</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:black;
+    height:100vh;
+    width:100vw;
+    font-family:Arial, sans-serif;
+}
+
+canvas{
+    position:absolute;
+    inset:0;
+}
+
+.center-name{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:clamp(40px, 10vw, 80px);
+    font-weight:bold;
+    z-index:10;
+    text-shadow:
+        0 0 10px #ff2d55,
+        0 0 20px #ff2d55,
+        0 0 40px #ff2d55;
+}
+</style>
+</head>
+<body>
+
+<div class="center-name">Alice ❤️</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+
+window.addEventListener("resize", resize);
+
+const particles = [];
+const total = window.innerWidth < 600 ? 180 : 320;
+
+function heartShape(t){
+    return {
+        x: 16 * Math.pow(Math.sin(t),3),
+        y: -(13*Math.cos(t)
+            -5*Math.cos(2*t)
+            -2*Math.cos(3*t)
+            -Math.cos(4*t))
+    };
+}
+
+class Particle{
+    constructor(){
+        this.t = Math.random() * Math.PI * 2;
+        this.offset = Math.random() * 0.02;
+        this.size = window.innerWidth < 600 ? 12 : 16;
+    }
+
+    update(time){
+
+        const scale = window.innerWidth < 600 ? 11 : 18;
+
+        const beat = 1 + Math.sin(time * 0.002) * 0.08;
+
+        const pos = heartShape(this.t + time * 0.0004 + this.offset);
+
+        this.x = canvas.width/2 + pos.x * scale * beat;
+        this.y = canvas.height/2 + pos.y * scale * beat;
+    }
+
+    draw(){
+        ctx.font = `${this.size}px Arial`;
+        ctx.fillStyle = `hsl(${340 + Math.sin(this.t)*20},100%,70%)`;
+        ctx.fillText("LOVE", this.x, this.y);
+    }
+}
+
+for(let i=0;i<total;i++){
+    particles.push(new Particle());
+}
+
+function animate(time){
+
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+        p.update(time);
+        p.draw();
+    });
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
